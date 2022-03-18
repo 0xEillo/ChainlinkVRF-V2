@@ -1,4 +1,5 @@
 pragma solidity ^0.8.0;
+import "hardhat/console.sol";
 
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
@@ -35,6 +36,11 @@ contract RandomNumber is VRFConsumerBaseV2 {
     uint256 public requestId;
     address owner;
 
+    event AddedConsumer(
+        uint256 indexed subscriptionId,
+        address indexed consumerAddress
+    );
+
     constructor(uint64 _subscriptionId) VRFConsumerBaseV2(vrfCoordinator) {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         LINKTOKEN = LinkTokenInterface(link);
@@ -58,6 +64,12 @@ contract RandomNumber is VRFConsumerBaseV2 {
         uint256[] memory randomWords
     ) internal override {
         randomNumbers = randomWords;
+    }
+
+    function addConsumer(address _consumerAddress) public onlyOwner {
+        console.log("in process");
+        COORDINATOR.addConsumer(subscriptionId, _consumerAddress);
+        emit AddedConsumer(subscriptionId, _consumerAddress);
     }
 
     modifier onlyOwner() {
